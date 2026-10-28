@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Biến môi trường và bí mật (KHÔNG đưa lên GitHub)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Build output
+build/
+dist/
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker (override cục bộ)
+docker-compose.override.yml
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
