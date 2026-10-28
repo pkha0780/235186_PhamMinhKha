@@ -46,6 +46,7 @@ Biến môi trường (`backend/.env`):
 |---|---|
 | `PORT` | Cổng chạy backend (mặc định 5000) |
 | `MONGODB_URI` | Chuỗi kết nối MongoDB Atlas |
+| `CORS_ORIGIN` | (Tùy chọn) Địa chỉ frontend được phép gọi API, nhiều địa chỉ cách nhau bằng dấu phẩy. Để trống thì cho phép mọi nguồn |
 
 ### Frontend
 
@@ -137,22 +138,42 @@ Chạy cả hai container trên máy: khởi động backend (xem phần Docker 
 
 ## Triển khai trên Render
 
+Cả hai dịch vụ là Web Service dạng **Existing Image** trên Render, lấy image đã đẩy lên Docker Hub (không cần build lại trên Render). Gói Free sẽ ngủ khi không dùng, lần truy cập đầu có thể chậm 30–60 giây.
+
+| Dịch vụ | Tên Render | Image | Biến môi trường | URL công khai |
+|---|---|---|---|---|
+| Backend API | `api-235186` | `docker.io/pkha0780/backend:latest` | `MONGODB_URI`, `CORS_ORIGIN` | https://api-235186.onrender.com |
+| Frontend | `web-235186` | `docker.io/pkha0780/frontend:latest` | `API_URL` | https://web-235186.onrender.com |
+
 ### Frontend
 
-Frontend được triển khai dưới dạng Web Service **Existing Image** trên Render, lấy image đã đẩy lên Docker Hub (không cần build lại trên Render).
-
-| Mục | Giá trị |
-|---|---|
-| Tên dịch vụ | `web-235186` |
-| Image | `docker.io/pkha0780/frontend:latest` |
-| Region | Singapore |
-| Instance Type | Free |
-| Health Check Path | `/` |
-| Biến môi trường | `API_URL` (địa chỉ backend mà giao diện gọi tới) |
-
-- URL công khai: https://web-235186.onrender.com
-- Gói Free sẽ ngủ khi không dùng, lần truy cập đầu có thể chậm 30–60 giây.
+- Region Singapore, Instance Type Free, Health Check Path `/`.
+- `API_URL` = địa chỉ backend mà giao diện gọi tới: `https://api-235186.onrender.com` (không có dấu `/` ở cuối).
 - Đã kiểm tra trên giao diện đã triển khai: xem danh sách, tìm kiếm, xem chi tiết, thêm, sửa, xóa sách.
+
+### Backend API
+
+- Region Singapore, Instance Type Free, Health Check Path `/health`.
+- `MONGODB_URI`: chuỗi kết nối MongoDB Atlas, nhập trực tiếp trong mục Environment của Render (không đưa vào mã nguồn hay image).
+- MongoDB Atlas → Network Access cần cho phép `0.0.0.0/0` vì Render không có IP cố định.
+- `PORT` do Render cấp, backend tự đọc.
+- CORS: `CORS_ORIGIN=https://web-235186.onrender.com` để chỉ frontend này được gọi API. Nếu không đặt biến này, backend cho phép mọi nguồn. Sau khi đổi image hoặc biến môi trường cần chọn **Manual Deploy → Deploy latest reference** để Render chạy bản mới.
+- Địa chỉ API cho frontend được cấu hình qua `API_URL` của dịch vụ frontend (xem trên).
+
+Kiểm tra trên hệ thống đã triển khai:
+
+```bash
+API=https://api-235186.onrender.com
+curl $API/health                                  # {"status":"ok","database":"connected",...}
+curl "$API/api/books"                             # xem danh sách
+curl "$API/api/books?search=clean"                # tìm kiếm
+curl -X POST $API/api/books -H "Content-Type: application/json" \
+  -d '{"bookId":"B005","title":"Sách thử","author":"Tester","category":"Test","publisher":"NXB","publishYear":2024,"isbn":"9780000000005","quantity":3}'
+curl -X PUT $API/api/books/B005 -H "Content-Type: application/json" -d '{"quantity":5}'
+curl -X DELETE $API/api/books/B005
+```
+
+Các trường hợp lỗi đã kiểm tra: thêm trùng `bookId` (409), thiếu hoặc sai dữ liệu (400), JSON hỏng (400), sách không tồn tại (404), endpoint không có (404).
 
 ## Lưu ý bảo mật
 

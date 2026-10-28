@@ -5,7 +5,13 @@ const booksRouter = require('./routes/books');
 
 const app = express();
 
-app.use(cors());
+// CORS_ORIGIN: danh sách địa chỉ frontend được phép, cách nhau bằng dấu phẩy
+// (ví dụ https://web-235186.onrender.com). Để trống hoặc "*" thì cho phép mọi nguồn.
+const allowedOrigins = (process.env.CORS_ORIGIN || '*')
+  .split(',')
+  .map((origin) => origin.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+app.use(cors({ origin: allowedOrigins.includes('*') ? '*' : allowedOrigins }));
 app.use(express.json());
 
 // Kiểm tra trạng thái backend và kết nối MongoDB
