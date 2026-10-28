@@ -75,7 +75,40 @@ Chức năng: xem danh sách, tìm kiếm, xem chi tiết, thêm, sửa, xóa s�
 | PUT | `/api/books/:id` | Cập nhật sách |
 | DELETE | `/api/books/:id` | Xóa sách |
 
-Docker và triển khai Render sẽ được bổ sung sau.
+## Docker
+
+Backend được đóng gói bằng `backend/Dockerfile` (Node 22 Alpine, chạy bằng user `node`). Image **không chứa** `.env` hay chuỗi kết nối; `MONGODB_URI` được truyền khi chạy container.
+
+- Image theo quy ước đặt tên: `235186phamminhkha/backend`
+- Đã đẩy lên Docker Hub (tài khoản `pkha0780`): https://hub.docker.com/r/pkha0780/backend
+
+```bash
+docker pull pkha0780/backend:latest
+```
+
+```bash
+# Build image
+cd backend
+docker build -t 235186phamminhkha/backend:latest .
+
+# Chạy container (truyền biến môi trường lúc chạy)
+docker run -d --name backend -p 5000:5000 \
+  -e MONGODB_URI="<chuỗi kết nối MongoDB Atlas>" \
+  235186phamminhkha/backend:latest
+# hoặc: docker run -d -p 5000:5000 --env-file .env 235186phamminhkha/backend:latest
+
+# Kiểm tra
+curl http://localhost:5000/health
+
+# Đẩy lên Docker Hub
+docker login
+docker tag 235186phamminhkha/backend:latest pkha0780/backend:latest
+docker push pkha0780/backend:latest
+```
+
+Biến môi trường khi chạy container: `MONGODB_URI` (bắt buộc), `PORT` (mặc định 5000). Nếu thiếu `MONGODB_URI`, container thoát ngay và báo lỗi.
+
+Triển khai Render sẽ được bổ sung sau.
 
 ## Lưu ý bảo mật
 
