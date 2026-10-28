@@ -108,6 +108,33 @@ docker push pkha0780/backend:latest
 
 Biến môi trường khi chạy container: `MONGODB_URI` (bắt buộc), `PORT` (mặc định 5000). Nếu thiếu `MONGODB_URI`, container thoát ngay và báo lỗi.
 
+### Docker cho frontend
+
+`frontend/Dockerfile` build 2 giai đoạn: Node 22 build ứng dụng React, sau đó nginx phục vụ tệp tĩnh (hỗ trợ SPA, cache tệp có hash). Địa chỉ backend không nhúng cứng vào image mà được ghi vào `config.js` khi container khởi động, nên đổi được bằng biến môi trường mà không cần build lại.
+
+- Image theo quy ước đặt tên: `235186phamminhkha/frontend`
+- Đã đẩy lên Docker Hub (tài khoản `pkha0780`): https://hub.docker.com/r/pkha0780/frontend
+
+```bash
+# Build image
+cd frontend
+docker build -t 235186phamminhkha/frontend:latest .
+
+# Chạy container, trỏ tới backend
+docker run -d --name frontend -p 8080:80 \
+  -e API_URL=http://localhost:5000 \
+  235186phamminhkha/frontend:latest
+# Mở http://localhost:8080
+
+# Đẩy lên Docker Hub
+docker tag 235186phamminhkha/frontend:latest pkha0780/frontend:latest
+docker push pkha0780/frontend:latest
+```
+
+Biến môi trường khi chạy container: `API_URL` (địa chỉ backend, ví dụ `https://api-235186.onrender.com`) và `PORT` (cổng nginx, mặc định 80).
+
+Chạy cả hai container trên máy: khởi động backend (xem phần Docker ở trên) rồi chạy frontend với `API_URL=http://localhost:5000`.
+
 Triển khai Render sẽ được bổ sung sau.
 
 ## Lưu ý bảo mật
