@@ -135,7 +135,24 @@ Biến môi trường khi chạy container: `API_URL` (địa chỉ backend, ví
 
 Chạy cả hai container trên máy: khởi động backend (xem phần Docker ở trên) rồi chạy frontend với `API_URL=http://localhost:5000`.
 
-Triển khai Render sẽ được bổ sung sau.
+## Triển khai trên Render
+
+### Frontend
+
+Frontend được triển khai dưới dạng Web Service **Existing Image** trên Render, lấy image đã đẩy lên Docker Hub (không cần build lại trên Render).
+
+| Mục | Giá trị |
+|---|---|
+| Tên dịch vụ | `web-235186` |
+| Image | `docker.io/pkha0780/frontend:latest` |
+| Region | Singapore |
+| Instance Type | Free |
+| Health Check Path | `/` |
+| Biến môi trường | `API_URL` (địa chỉ backend mà giao diện gọi tới) |
+
+- URL công khai: https://web-235186.onrender.com
+- Gói Free sẽ ngủ khi không dùng, lần truy cập đầu có thể chậm 30–60 giây.
+- Đã kiểm tra trên giao diện đã triển khai: xem danh sách, tìm kiếm, xem chi tiết, thêm, sửa, xóa sách.
 
 ## Lưu ý bảo mật
 
