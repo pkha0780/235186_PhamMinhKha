@@ -21,7 +21,8 @@
 235186_PhamMinhKha/
 ├── backend/     # Node.js + Express API
 │   └── src/     # app.js, index.js, models/, routes/
-├── frontend/    # Giao diện React (sẽ bổ sung)
+├── frontend/    # Giao diện React (Vite)
+│   └── src/     # components/, services/, hooks/
 ├── .gitignore
 └── README.md
 ```
@@ -46,6 +47,22 @@ Biến môi trường (`backend/.env`):
 | `PORT` | Cổng chạy backend (mặc định 5000) |
 | `MONGODB_URI` | Chuỗi kết nối MongoDB Atlas |
 
+### Frontend
+
+```bash
+cd frontend
+cp .env.example .env     # chỉnh VITE_API_URL nếu backend không chạy ở localhost:5000
+npm install
+npm run dev              # http://localhost:3000
+```
+
+Địa chỉ backend được xác định theo thứ tự ưu tiên:
+1. `frontend/public/config.js` (`window.__APP_CONFIG__.API_URL`): sửa được sau khi build, tiện khi triển khai.
+2. Biến `VITE_API_URL` lúc build.
+3. Mặc định `http://localhost:5000`.
+
+Chức năng: xem danh sách, tìm kiếm, xem chi tiết, thêm, sửa, xóa sách; có trạng thái đang tải, thông báo lỗi và thông báo kết quả thao tác.
+
 ### API
 
 | Phương thức | Endpoint | Chức năng |
@@ -58,7 +75,7 @@ Biến môi trường (`backend/.env`):
 | PUT | `/api/books/:id` | Cập nhật sách |
 | DELETE | `/api/books/:id` | Xóa sách |
 
-Frontend, Docker và triển khai Render sẽ được bổ sung sau.
+Docker và triển khai Render sẽ được bổ sung sau.
 
 ## Lưu ý bảo mật
 
